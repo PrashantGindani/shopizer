@@ -21,6 +21,7 @@ import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValue;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.extradetail.ProductExtraDetails;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
@@ -231,6 +232,20 @@ public class ProductTest extends com.salesmanager.test.common.AbstractSalesManag
 
 	    product.getDescriptions().add(description);
 
+
+	    // Product description
+	    ProductExtraDetails extradetails = new ProductExtraDetails();
+	    extradetails.setReturnInDays(1);
+	    extradetails.setReturnText("ABCD");
+	    extradetails.setWarrantyPeriod(1,0,0);
+	    extradetails.setWarrantySummary("anaakkak");
+	    extradetails.setCod(false);
+	    extradetails.setGst(false);
+	    description.setLanguage(en);
+	    description.setProduct(product);
+
+	    product.getDescriptions().add(description);
+	    
 	    //add category
 	    product.getCategories().add(tech);
 

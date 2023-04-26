@@ -33,6 +33,7 @@ import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.extradetail.ProductExtraDetails;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
@@ -70,6 +71,9 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<ProductDescription> descriptions = new HashSet<ProductDescription>();
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
+	private Set<ProductExtraDetails> extradetails = new HashSet<ProductExtraDetails>();
 	
 	/**
 	 * Inventory
@@ -341,6 +345,14 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 		this.descriptions = descriptions;
 	}
 
+
+	public Set<ProductExtraDetails> getExtradetails() {
+		return extradetails;
+	}
+
+	public void setExtradetails(Set<ProductExtraDetails> extradetails) {
+		this.extradetails = extradetails;
+	}
 
 	public boolean getProductVirtual() {
 		return productVirtual;

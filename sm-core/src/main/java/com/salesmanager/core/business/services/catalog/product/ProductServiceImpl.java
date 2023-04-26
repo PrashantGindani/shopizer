@@ -40,6 +40,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.ProductCriteria;
 import com.salesmanager.core.model.catalog.product.ProductList;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.extradetail.ProductExtraDetails;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
 import com.salesmanager.core.model.catalog.product.review.ProductReview;
@@ -111,6 +112,19 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 	}
 
 	@Override
+	public void addProductExtraDetails(Product product, ProductExtraDetails extradetails) throws ServiceException {
+
+		if (product.getExtradetails() == null) {
+			product.setExtradetails(new HashSet<ProductExtraDetails>());
+		}
+
+		product.getExtradetails().add(extradetails);
+		extradetails.setProduct(product);
+		update(product);
+
+	}
+	
+	@Override
 	public List<Product> getProducts(List<Long> categoryIds) throws ServiceException {
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -149,6 +163,16 @@ public class ProductServiceImpl extends SalesManagerEntityServiceImpl<Long, Prod
 		return null;
 	}
 
+	@Override
+	public ProductExtraDetails getProductExtraDetails(Product product, Language language) {
+		for (ProductExtraDetails extradetails : product.getExtradetails()) {
+			if (extradetails.getLanguage().equals(language)) {
+				return extradetails;
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public Product getBySeUrl(MerchantStore store, String seUrl, Locale locale) {
 		return productRepository.getByFriendlyUrl(store, seUrl, locale);

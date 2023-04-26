@@ -13,6 +13,7 @@ import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.ProductCriteria;
 import com.salesmanager.core.model.catalog.product.ProductList;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
+import com.salesmanager.core.model.catalog.product.extradetail.ProductExtraDetails;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.tax.taxclass.TaxClass;
@@ -27,6 +28,10 @@ public interface ProductService extends SalesManagerEntityService<Long, Product>
 
 	ProductDescription getProductDescription(Product product, Language language);
 
+	void addProductExtraDetails(Product product, ProductExtraDetails extradetails) throws ServiceException;
+
+	ProductExtraDetails getProductExtraDetails(Product product, Language language);
+	
 	Product getProductForLocale(long productId, Language language, Locale locale) throws ServiceException;
 
 	List<Product> getProductsForLocale(Category category, Language language, Locale locale) throws ServiceException;
