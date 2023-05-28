@@ -66,7 +66,7 @@ public interface ProductFacade {
    * @return
    * @throws Exception
    */
-  ReadableProductList getProductListsByCriterias(MerchantStore store, Language language,
+  ReadableProductList getProductListsByCriterias(String user_nick,MerchantStore store, Language language,
       ProductCriteria criterias) throws Exception;
 
   /**

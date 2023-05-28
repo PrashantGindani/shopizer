@@ -5,7 +5,11 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -13,12 +17,18 @@ import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.mapper.Mapper;
 import com.salesmanager.shop.model.catalog.category.ReadableCategory;
 import com.salesmanager.shop.model.catalog.category.ReadableCategoryFull;
+import com.salesmanager.shop.utils.ImageFilePath;
 
 @Component
 public class ReadableCategoryMapper implements Mapper<Category, ReadableCategory> {
   
   private static final Logger LOGGER = LoggerFactory.getLogger(ReadableCategoryMapper.class);
 
+  	@Autowired
+	@Qualifier("img")
+	private ImageFilePath imageUtils;
+  
+  	
   @Override
   public ReadableCategory convert(Category source, MerchantStore store, Language language) {
 
@@ -56,6 +66,7 @@ public class ReadableCategoryMapper implements Mapper<Category, ReadableCategory
     target.setSortOrder(source.getSortOrder());
     target.setVisible(source.isVisible());
     target.setFeatured(source.isFeatured());
+    target.setImgUrl(imageUtils.buildOtherAssetFilePath(source.getMerchantStore(), Constants.CATEGORY_URI, source.getCategoryImage()));
   }
 
   private com.salesmanager.shop.model.catalog.category.CategoryDescription convertDescription(

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,15 @@ import com.salesmanager.core.business.services.catalog.pricing.PricingService;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
 import com.salesmanager.core.business.services.catalog.product.relationship.ProductRelationshipService;
+import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.ProductCriteria;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationshipType;
+import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.core.model.wishlist.WishListItem;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.catalog.product.ReadableProductList;
 import com.salesmanager.shop.model.catalog.product.product.PersistableProduct;
@@ -43,6 +47,9 @@ public class ProductFacadeImpl implements ProductFacade {
 
 	@Inject
 	private CategoryService categoryService;
+	
+	@Inject
+	private CustomerService customerService;
 	
 	@Inject
 	private ProductAttributeService productAttributeService;
@@ -92,7 +99,7 @@ public class ProductFacadeImpl implements ProductFacade {
 	}
 
 	@Override
-	public ReadableProductList getProductListsByCriterias(MerchantStore store, Language language,
+	public ReadableProductList getProductListsByCriterias(String user_nick,MerchantStore store, Language language,
 			ProductCriteria criterias) throws Exception {
 
 		Validate.notNull(criterias, "ProductCriteria must be set for this product");
@@ -145,6 +152,24 @@ public class ProductFacadeImpl implements ProductFacade {
 
 		}
 
+		if(!StringUtils.isBlank(user_nick)) {
+			
+			Customer customer = customerService.getByNick(user_nick);
+			
+			if(customer==null) {
+				throw new ServiceRuntimeException("Customer doesn't exists");
+			}
+			
+			List<Long> ww = customer.getWishlistItems().stream().map(s -> s.getProductId()).collect(Collectors.toList());
+			
+			for (ReadableProduct product : productList.getProducts()) {
+				if(ww.contains(product.getId())){
+					product.setIsWishlist(true);
+				}
+			}
+				
+		}
+		
 		// productList.setTotalPages(products.getTotalCount());
 		productList.setRecordsTotal(modelProductList.getTotalElements());
 		productList.setNumber(productList.getProducts().size());

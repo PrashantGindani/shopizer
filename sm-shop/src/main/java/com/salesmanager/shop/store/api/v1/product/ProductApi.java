@@ -3,6 +3,7 @@ package com.salesmanager.shop.store.api.v1.product;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,6 +212,9 @@ public class ProductApi {
 			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
+		Principal principal = request.getUserPrincipal();
+		String userName = principal!=null? principal.getName():"";
+		
 		ProductCriteria criteria = new ProductCriteria();
 
 		criteria.setOrigin(origin);
@@ -275,7 +279,7 @@ public class ProductApi {
 		// REPOSITORY to use the new filters
 
 		try {
-			return productFacade.getProductListsByCriterias(merchantStore, language, criteria);
+			return productFacade.getProductListsByCriterias(userName,merchantStore, language, criteria);
 
 		} catch (Exception e) {
 

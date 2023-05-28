@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.api.v1.customer;
 
+import java.util.Collections;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,10 +30,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.google.api.client.auth.openidconnect.IdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.model.customer.OAuthCustomer;
 import com.salesmanager.shop.model.customer.PersistableCustomer;
 import com.salesmanager.shop.store.api.exception.GenericRuntimeException;
 import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
@@ -63,6 +73,11 @@ import springfox.documentation.annotations.ApiIgnore;
 public class AuthenticateCustomerApi {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticateCustomerApi.class);
+    private static final String CLIENT_ID = System.getenv("GOOGLE_OAUTH2_CLIENT_ID");
+    private static final String CLIENT_SECRET = System.getenv("GOOGLE_OAUTH2_CLIENT_SECRET");
+    private static final HttpTransport transport = new NetHttpTransport();
+    private static final JacksonFactory jsonFactory = new JacksonFactory();
+
 
     @Value("${authToken.header}")
     private String tokenHeader;
@@ -242,5 +257,77 @@ public class AuthenticateCustomerApi {
         } catch(Exception e) {
             return ResponseEntity.badRequest().body("Exception when reseting password "+e.getMessage());
         }
+    }
+    
+    @RequestMapping( value={"/customer/OAuthSignin"}, method=RequestMethod.POST, produces ={ "application/json" })
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(httpMethod = "POST", value = "Authenticates a oauth customer to the application", notes = "Used as self-served operation",response = AuthenticationResponse.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "string", defaultValue = "DEFAULT"),
+		@ApiImplicitParam(name = "lang", dataType = "string", defaultValue = "en") })
+    @ResponseBody
+    public ResponseEntity<?> OAuthSignin(
+    		@Valid @RequestBody OAuthCustomer oauthcustomer, 
+			@ApiIgnore MerchantStore merchantStore,
+			@ApiIgnore Language language) throws Exception {
+
+    		System.out.println(" -----------------    "+CLIENT_ID);
+	        Validate.notNull(oauthcustomer.getIdToken(),"IdToken cannot be null");
+	        Validate.notNull(oauthcustomer.getAccessToken(),"AccessToken cannot be null");
+
+	        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+	                .setAudience(Collections.singletonList(CLIENT_ID))
+	                .build();
+	        GoogleIdToken idToken = verifier.verify(oauthcustomer.getIdToken());
+	        String email,name,pictureUrl;
+	        PersistableCustomer customer= new PersistableCustomer();
+	        String uniqueId = UUID.randomUUID().toString();
+	        if (idToken != null) {
+	            Payload payload = idToken.getPayload();
+	            customer.setEmailAddress((String) payload.get("email"));
+	            customer.setFirstName((String) payload.get("given_name"));
+	            customer.setLastName((String) payload.get("given_name"));
+	            customer.setUserName(customer.getEmailAddress());
+	            customer.setPassword(uniqueId);
+	            customer.setRepeatPassword(uniqueId);
+	            customer.setLanguage("en");
+	        } else {
+	        	throw new GenericRuntimeException("409", "Invalid ID token.");
+	        }
+            
+			if(!customerFacade.checkIfUserExists(customer.getEmailAddress(),  merchantStore)) {
+				customerFacade.registerCustomer(customer, merchantStore, language);
+			}{
+				Customer custObj = customerFacade.getCustomerByUserName(customer.getEmailAddress(), merchantStore);
+				customerFacade.changePassword(custObj, uniqueId); 
+			}
+            // Perform the security
+            Authentication authentication = null;
+            try {
+                
+                authentication = jwtCustomerAuthenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                customer.getUserName(),
+                                customer.getPassword()
+                        )
+                );
+                
+            } catch(Exception e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            if(authentication == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Reload password post-security so we can generate token
+            final JWTUser userDetails = (JWTUser)jwtCustomerDetailsService.loadUserByUsername(customer.getUserName());
+            final String token = jwtTokenUtil.generateToken(userDetails);
+
+            // Return the token
+            return ResponseEntity.ok(new AuthenticationResponse(customer.getId(),token));
+
+        
     }
 }

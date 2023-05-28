@@ -22,10 +22,14 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.cms.impl.CMSManager;
+import com.salesmanager.core.business.modules.cms.product.OtherAssetsManager;
 import com.salesmanager.core.business.modules.cms.product.ProductAssetsManager;
+import com.salesmanager.core.model.banner.Banners;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.content.FileContentType;
 import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.content.OutputContentFile;
@@ -358,5 +362,159 @@ public class S3ProductContentFileManager
     this.cmsManager = cmsManager;
   }
 
+	@Override
+	public void addCategoryImage(Category category, ImageContentFile contentImage) throws ServiceException {
+	
+	    try {
+	      // get buckets
+	      String bucketName = bucketName();
+	      final AmazonS3 s3 = s3Client();
+	
+	      String nodePath = new StringBuilder().append(CATEGORY_ROOT).append(Constants.SLASH).append(category.getMerchantStore().getCode())
+	    	        .append(Constants.SLASH).toString(); 
+	
+	      ObjectMetadata metadata = new ObjectMetadata();
+	      metadata.setContentType(contentImage.getMimeType());
+	
+	      PutObjectRequest request = new PutObjectRequest(bucketName,
+	          nodePath + category.getCategoryImage(), contentImage.getFile(), metadata);
+	      request.setCannedAcl(CannedAccessControlList.PublicRead);
+	
+	
+	      s3.putObject(request);
+	
+	
+	      LOGGER.info("Catgeory add file");
+	
+	    } catch (final Exception e) {
+	      LOGGER.error("Error while removing file", e);
+	      throw new ServiceException(e);
+	
+	    }
+	
+	}
+	
+	@Override
+	public void removeCategoryImage(Category category) throws ServiceException {
+		
+		try {
+		      // get buckets
+		      String bucketName = bucketName();
+	
+		      final AmazonS3 s3 = s3Client();
+		      String nodePath = new StringBuilder().append(CATEGORY_ROOT).append(Constants.SLASH).append(category.getMerchantStore().getCode())
+		    	        .append(Constants.SLASH).append(category.getCategoryImage()).toString(); 
+		      s3.deleteObject(bucketName, nodePath);
+	
+		      LOGGER.info("Remove file");
+		    } catch (final Exception e) {
+		      LOGGER.error("Error while removing file", e);
+		      throw new ServiceException(e);
+	
+		    }
+	}
+
+	@Override
+	public void addManufacturerImage(Manufacturer manufacturer, ImageContentFile contentImage) throws ServiceException {
+	
+	    try {
+	      // get buckets
+	      String bucketName = bucketName();
+	      final AmazonS3 s3 = s3Client();
+	
+	      String nodePath = new StringBuilder().append(MANUFACTURER_ROOT).append(Constants.SLASH).append(manufacturer.getMerchantStore().getCode())
+	    	        .append(Constants.SLASH).toString(); 
+	
+	      ObjectMetadata metadata = new ObjectMetadata();
+	      metadata.setContentType(contentImage.getMimeType());
+	
+	      PutObjectRequest request = new PutObjectRequest(bucketName,
+	          nodePath + manufacturer.getImageName(), contentImage.getFile(), metadata);
+	      request.setCannedAcl(CannedAccessControlList.PublicRead);
+	
+	
+	      s3.putObject(request);
+	
+	
+	      LOGGER.info("Catgeory add file");
+	
+	    } catch (final Exception e) {
+	      LOGGER.error("Error while removing file", e);
+	      throw new ServiceException(e);
+	
+	    }
+	
+	}
+	
+	@Override
+	public void removeManufacturerImage(Manufacturer manufacturer) throws ServiceException {
+		
+		try {
+		      // get buckets
+		      String bucketName = bucketName();
+	
+		      final AmazonS3 s3 = s3Client();
+		      String nodePath = new StringBuilder().append(MANUFACTURER_ROOT).append(Constants.SLASH).append(manufacturer.getMerchantStore().getCode())
+		    	        .append(Constants.SLASH).append(manufacturer.getImageName()).toString(); 
+		      s3.deleteObject(bucketName, nodePath);
+	
+		      LOGGER.info("Remove file");
+		    } catch (final Exception e) {
+		      LOGGER.error("Error while removing file", e);
+		      throw new ServiceException(e);
+	
+		    }
+	}
+
+	@Override
+	public void addBannerImage(Banners banner, ImageContentFile contentImage) throws ServiceException {
+
+	    try {
+	      // get buckets
+	      String bucketName = bucketName();
+	      final AmazonS3 s3 = s3Client();
+	
+	      String nodePath = new StringBuilder().append(BANNER_ROOT).append(Constants.SLASH).toString(); 
+	
+	      ObjectMetadata metadata = new ObjectMetadata();
+	      metadata.setContentType(contentImage.getMimeType());
+	
+	      PutObjectRequest request = new PutObjectRequest(bucketName,
+	          nodePath + banner.getImageName(), contentImage.getFile(), metadata);
+	      request.setCannedAcl(CannedAccessControlList.PublicRead);
+	
+	
+	      s3.putObject(request);
+	
+	
+	      LOGGER.info("Catgeory add file");
+	
+	    } catch (final Exception e) {
+	      LOGGER.error("Error while removing file", e);
+	      throw new ServiceException(e);
+	
+	    }
+	
+	}
+
+	@Override
+	public void removeBannerImage(Banners banner) throws ServiceException {
+		
+		try {
+		      // get buckets
+		      String bucketName = bucketName();
+	
+		      final AmazonS3 s3 = s3Client();
+		      String nodePath = new StringBuilder().append(BANNER_ROOT).append(Constants.SLASH)
+		    		  .append(banner.getImageName()).toString(); 
+		      s3.deleteObject(bucketName, nodePath);
+	
+		      LOGGER.info("Remove file");
+		    } catch (final Exception e) {
+		      LOGGER.error("Error while removing file", e);
+		      throw new ServiceException(e);
+	
+		    }
+	}
 
 }

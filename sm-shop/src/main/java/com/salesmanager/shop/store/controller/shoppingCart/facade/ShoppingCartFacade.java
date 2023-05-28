@@ -126,6 +126,19 @@ public interface ShoppingCartFacade {
 	ReadableShoppingCart removeShoppingCartItem(String cartCode, String sku, MerchantStore merchant, Language language, boolean returnCart) throws Exception;
 
 	/**
+	 * Finds a shopping cart item
+	 * @param cartCode
+	 * @param sku
+	 * @param merchant
+	 * @param language
+	 * @param returnCart
+	 * @return ReadableShoppingCart or NULL
+	 * @throws Exception
+	 */
+	@Nullable
+	ReadableShoppingCart findOrAddShoppingCartItem(String cartCode, String sku, MerchantStore merchant, Language language, boolean returnCart) throws Exception;
+
+	/**
 	 * Add product to ShoppingCart
 	 * This method is used by the API
 	 * @param customer

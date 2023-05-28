@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -299,5 +300,23 @@ public class ShoppingCartApi {
 			return new ResponseEntity<>(updatedCart, HttpStatus.OK);
 		}
 		return new ResponseEntity<>(updatedCart, HttpStatus.NO_CONTENT);
+	}
+	
+	@PutMapping(value = "/cart/{code}/product/{sku}", produces = { APPLICATION_JSON_VALUE })
+	@ApiOperation(httpMethod = "PUT", value = "Find a product from a specific cart", notes = "If body set to true returns remaining cart in body, empty cart gives empty body. If body set to false no body ", produces = "application/json", response = ReadableShoppingCart.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en"),
+			@ApiImplicitParam(name = "body", dataType = "boolean", defaultValue = "false"), })
+	public ResponseEntity<ReadableShoppingCart> findOrdAddCartItem(@PathVariable("code") String cartCode,
+			@PathVariable("sku") String sku, 
+			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language,
+			@RequestParam(defaultValue = "false") boolean body) throws Exception {
+
+		ReadableShoppingCart updatedCart = shoppingCartFacade.findOrAddShoppingCartItem(cartCode, sku, merchantStore,
+				language, body);
+//		if (body) {
+			return new ResponseEntity<>(updatedCart, HttpStatus.OK);
+//		}
+//		return new ResponseEntity<>(updatedCart, HttpStatus.NO_CONTENT);
 	}
 }

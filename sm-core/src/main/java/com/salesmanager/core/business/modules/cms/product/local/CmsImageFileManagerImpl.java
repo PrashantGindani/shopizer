@@ -14,10 +14,14 @@ import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.cms.impl.CMSManager;
 import com.salesmanager.core.business.modules.cms.impl.LocalCacheManagerImpl;
+import com.salesmanager.core.business.modules.cms.product.OtherAssetsManager;
 import com.salesmanager.core.business.modules.cms.product.ProductAssetsManager;
+import com.salesmanager.core.model.banner.Banners;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.content.FileContentType;
 import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.content.OutputContentFile;
@@ -304,6 +308,96 @@ public class CmsImageFileManagerImpl
     this.cacheManager = cacheManager;
   }
 
+
+  @Override
+  public void addCategoryImage(Category category, ImageContentFile contentImage)
+      throws ServiceException {
+
+
+    try {
+
+      // base path
+      String rootPath = new StringBuilder().append(getRootName()).append(Constants.SLASH).append(CATEGORY_ROOT)
+    	        .append(Constants.SLASH).toString();
+      Path confDir = Paths.get(rootPath);
+      this.createDirectoryIfNorExist(confDir);
+
+      // node path
+      StringBuilder nodePath = new StringBuilder();
+      nodePath.append(rootPath).append(category.getMerchantStore().getCode());
+      Path merchantPath = Paths.get(nodePath.toString());
+      this.createDirectoryIfNorExist(merchantPath);
+
+      // category path
+      // file creation
+      nodePath.append(Constants.SLASH).append(contentImage.getFileName());
+
+
+      Path path = Paths.get(nodePath.toString());
+      InputStream isFile = contentImage.getFile();
+
+      Files.copy(isFile, path, StandardCopyOption.REPLACE_EXISTING);
+
+
+    } catch (Exception e) {
+
+      throw new ServiceException(e);
+
+    }
+
+  }
+  
+  @Override
+  public void removeCategoryImage(Category category) throws ServiceException {
+
+
+	    try {
+	    	
+	    	String rootPath = new StringBuilder().append(getRootName()).append(Constants.SLASH).append(CATEGORY_ROOT)
+	    	        .append(Constants.SLASH).toString();
+	    	StringBuilder nodePath = new StringBuilder(rootPath);
+	    	nodePath.append(category.getMerchantStore().getCode()).append(Constants.SLASH)
+	          .append(category.getCategoryImage());
+
+	      // delete 
+  	      Path path = Paths.get(nodePath.toString());
+
+	      Files.deleteIfExists(path);
+
+	    } catch (Exception e) {
+	      throw new ServiceException(e);
+	    }
+
+
+	  }
+
+@Override
+public void removeManufacturerImage(Manufacturer manufacturer) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void addManufacturerImage(Manufacturer manufacturer, ImageContentFile contentImage) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void addBannerImage(Banners banner, ImageContentFile contentImage) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void removeBannerImage(Banners banner) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    throw new ServiceException("Other Asset Manager Error");
+}
 
 
 }

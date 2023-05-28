@@ -23,6 +23,7 @@ public class ReadableProduct extends ProductEntity implements Serializable {
 	private ProductDescription description;
 	private ReadableProductPrice productPrice;
 	private String finalPrice = "0";
+	private boolean isWishlist = false;
 	private String originalPrice = null;
 	private boolean discounted = false;
 	private ReadableImage image;
@@ -165,6 +166,14 @@ public class ReadableProduct extends ProductEntity implements Serializable {
 
 	public void setVariants(List<ReadableProductVariant> variants) {
 		this.variants = variants;
+	}
+
+	public boolean getIsWishlist() {
+		return isWishlist;
+	}
+
+	public void setIsWishlist(boolean isWishlist) {
+		this.isWishlist = isWishlist;
 	}
 
 

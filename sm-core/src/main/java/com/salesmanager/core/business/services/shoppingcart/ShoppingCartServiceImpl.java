@@ -229,7 +229,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Transactional(noRollbackFor = { org.springframework.dao.EmptyResultDataAccessException.class })
 	private ShoppingCart getPopulatedShoppingCart(final ShoppingCart shoppingCart, MerchantStore store) throws Exception {
-
+//TODO
 		try {
 
 			boolean cartIsObsolete = false;
@@ -291,7 +291,7 @@ public class ShoppingCartServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 	@Transactional
 	private void getPopulatedItem(final ShoppingCartItem item, MerchantStore store) throws Exception {
-
+		//TODO
 		Product product = productService.getBySku(item.getSku(), store, store.getDefaultLanguage());
 
 		if (product == null) {

@@ -55,7 +55,7 @@ public class SearchApi {
       @RequestBody SearchProductRequest searchRequest,
       @ApiIgnore MerchantStore merchantStore,
       @ApiIgnore Language language) {
-
+	  System.out.println(""+"SearchProductRequest [query=" + searchRequest.getQuery() + ", count=" + searchRequest.getCount() + ", start=" + searchRequest.getStart() + "]");
     return searchFacade.search(merchantStore, language, searchRequest);
   }
 

@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -212,8 +213,8 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	
 	@Column(name="RENTAL_PERIOD", nullable = true)
 	private Integer rentalPeriod;
-
 	
+
 	public Integer getRentalPeriod() {
 		return rentalPeriod;
 	}
@@ -549,8 +550,6 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	public void setProductShipeable(boolean productShipeable) {
 		this.productShipeable = productShipeable;
 	}
-
-
 
 
 }

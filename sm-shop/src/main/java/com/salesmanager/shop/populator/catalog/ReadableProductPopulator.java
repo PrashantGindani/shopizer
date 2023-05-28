@@ -132,6 +132,7 @@ public class ReadableProductPopulator extends
 			target.setPreOrder(source.isPreOrder());
 			target.setRefSku(source.getRefSku());
 			target.setSortOrder(source.getSortOrder());
+			
 
 			if(source.getType() != null) {
 				target.setType(this.type(source.getType(), language));
@@ -250,7 +251,7 @@ public class ReadableProductPopulator extends
 
 			if(!CollectionUtils.isEmpty(source.getCategories())) {
 
-				ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator();
+				ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator(imageUtils);
 				List<ReadableCategory> categoryList = new ArrayList<ReadableCategory>();
 
 				for(Category category : source.getCategories()) {

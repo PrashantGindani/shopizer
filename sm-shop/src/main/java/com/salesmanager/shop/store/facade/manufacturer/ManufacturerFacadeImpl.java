@@ -7,8 +7,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.jsoup.helper.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.manufacturer.ManufacturerService;
@@ -28,6 +31,7 @@ import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.api.exception.UnauthorizedException;
 import com.salesmanager.shop.store.controller.manufacturer.facade.ManufacturerFacade;
+import com.salesmanager.shop.utils.ImageFilePath;
 
 @Service("manufacturerFacade")
 public class ManufacturerFacadeImpl implements ManufacturerFacade {
@@ -44,6 +48,10 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
   
   @Inject
   private LanguageService languageService;
+  
+  @Autowired
+  @Qualifier("img")
+  private ImageFilePath imageUtils;
 
   @Override
   public List<ReadableManufacturer> getByProductInCategory(MerchantStore store, Language language,
@@ -135,7 +143,7 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
 
     ReadableManufacturer readableManufacturer = new ReadableManufacturer();
 
-    ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
+    ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator(imageUtils);
     readableManufacturer = populator.populate(manufacturer, readableManufacturer, store, language);
 
 
@@ -178,7 +186,7 @@ public class ManufacturerFacadeImpl implements ManufacturerFacade {
       }
 
       
-      ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
+      ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator(imageUtils);
       List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
   
       for (Manufacturer m : manufacturers) {
@@ -235,7 +243,7 @@ public ReadableManufacturerList listByStore(MerchantStore store, Language langua
 
 
         
-        ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator();
+        ReadableManufacturerPopulator populator = new ReadableManufacturerPopulator(imageUtils);
         List<ReadableManufacturer> returnList = new ArrayList<ReadableManufacturer>();
     
         for (Manufacturer mf : manufacturers) {
@@ -253,5 +261,52 @@ public ReadableManufacturerList listByStore(MerchantStore store, Language langua
 	
 }
 
+	@Override
+	public void setImage(Long id, MultipartFile image, MerchantStore store, Language language) throws Exception {
+		
+		Validate.notNull(id, "Manufacturer id must not be null");
+		Validate.notNull(image, "Image must not be null");
+		Validate.notNull(store, "Store must not be null");
+		
+		Manufacturer mm= manufacturerService.getById(id);
+		if(mm==null) {
+			throw new ServiceRuntimeException("Error no Manufacturer [" + id + "] exists");
+		}
+	
+		// security validation
+		// product belongs to merchant store
+		if (mm.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+			throw new UnauthorizedException("Resource not authorized for this merchant");
+		}
+		
+		mm.setImageUrl("M"+id+"-"+image.getOriginalFilename());
+		mm.setImage(image.getInputStream());
+		
+		manufacturerService.addManufacturerImage(mm);
+		
+		//categoryService.saveOrUpdate(cc);
+	}
+	
+	@Override
+	public void deleteImage(Long id, MerchantStore store, Language language) throws Exception {
+		
+		Validate.notNull(id, "Category id must not be null");
+		Validate.notNull(store, "Store must not be null");
+		
+		Manufacturer mm= manufacturerService.getById(id);
+		if(mm==null) {
+			throw new ServiceRuntimeException("Error no Manufacturer [" + id + "] exists");
+		}
+	
+		// security validation
+		// product belongs to merchant store
+		if (mm.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+			throw new UnauthorizedException("Resource not authorized for this merchant");
+		}
+		
+		
+		manufacturerService.removeManufacturerImage(mm);
+		
+	}
 
 }

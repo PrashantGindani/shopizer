@@ -6,6 +6,7 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityService;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
+import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 
@@ -123,6 +124,10 @@ public interface CategoryService extends SalesManagerEntityService<Long, Categor
 	Category findById(Long category);
 	
 	int count(MerchantStore store);
+
+	void addCategoryImage(Category category) throws ServiceException;
+
+	void removeCategoryImage(Category category) throws ServiceException;
 
 
 	

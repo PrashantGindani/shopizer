@@ -18,9 +18,12 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.utils.CoreConfiguration;
 import com.salesmanager.core.business.utils.ProductImageCropUtils;
 import com.salesmanager.core.business.utils.ProductImageSizeUtils;
+import com.salesmanager.core.model.banner.Banners;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.content.FileContentType;
 import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.content.OutputContentFile;
@@ -34,7 +37,8 @@ public class ProductFileManagerImpl extends ProductFileManager {
   private ProductImagePut uploadImage;
   private ProductImageGet getImage;
   private ProductImageRemove removeImage;
-
+  private OtherAssetsManager otherAssetsManager; 
+  
   private CoreConfiguration configuration;
 
   private final static String PRODUCT_IMAGE_HEIGHT_SIZE = "PRODUCT_IMAGE_HEIGHT_SIZE";
@@ -335,7 +339,14 @@ public class ProductFileManagerImpl extends ProductFileManager {
     this.uploadImage = uploadImage;
   }
 
+  public OtherAssetsManager getOtherAssetsManager() {
+    return otherAssetsManager;
+  }
 
+
+  public void setOtherAssetsManager(OtherAssetsManager otherAssetsManager) {
+    this.otherAssetsManager = otherAssetsManager;
+  }
 
   public ProductImageGet getGetImage() {
     return getImage;
@@ -362,5 +373,166 @@ public class ProductFileManagerImpl extends ProductFileManager {
   }
 
 
+@Override
+public void addCategoryImage(Category category, ImageContentFile contentImage) throws ServiceException {
+	
+	try {
+
+	      /** copy to input stream **/
+	      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	      // Fake code simulating the copy
+	      // You can generally do better with nio if you need...
+	      // And please, unlike me, do something about the Exceptions :D
+	      byte[] buffer = new byte[1024];
+	      int len;
+	      while ((len = contentImage.getFile().read(buffer)) > -1) {
+	        baos.write(buffer, 0, len);
+	      }
+	      baos.flush();
+
+	      InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+	      InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+
+	      BufferedImage bufferedImage = ImageIO.read(is2);
+
+	      if (bufferedImage == null) {
+	        LOGGER.error("Cannot read image format for " + category.getCategoryImage());
+	        throw new Exception("Cannot read image format " + category.getCategoryImage());
+	      }
+
+	      // contentImage.setBufferedImage(bufferedImage);
+	      contentImage.setFile(is1);
+
+
+	      // upload original -- L
+	      contentImage.setFileContentType(FileContentType.CATEGORY);
+	      otherAssetsManager.addCategoryImage(category, contentImage);
+
+
+	    } catch (Exception e) {
+	      throw new ServiceException(e);
+	    } finally {
+	      try {
+	    	  category.getImageSvg().close();
+	      } catch (Exception ignore) {
+	      }
+	    }
+	
+}
+
+
+@Override
+public void removeCategoryImage(Category category) throws ServiceException {
+	
+	this.otherAssetsManager.removeCategoryImage(category);
+	
+}
+
+
+@Override
+public void addManufacturerImage(Manufacturer manufacturer, ImageContentFile contentImage) throws ServiceException {
+
+	try {
+
+	      /** copy to input stream **/
+	      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	      // Fake code simulating the copy
+	      // You can generally do better with nio if you need...
+	      // And please, unlike me, do something about the Exceptions :D
+	      byte[] buffer = new byte[1024];
+	      int len;
+	      while ((len = contentImage.getFile().read(buffer)) > -1) {
+	        baos.write(buffer, 0, len);
+	      }
+	      baos.flush();
+
+	      InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+	      InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+
+	      BufferedImage bufferedImage = ImageIO.read(is2);
+
+	      if (bufferedImage == null) {
+	        LOGGER.error("Cannot read image format for " + manufacturer.getImage());
+	        throw new Exception("Cannot read image format " + manufacturer.getImage());
+	      }
+
+	      // contentImage.setBufferedImage(bufferedImage);
+	      contentImage.setFile(is1);
+
+
+	      // upload original -- L
+	      contentImage.setFileContentType(FileContentType.MANUFACTURER);
+	      otherAssetsManager.addManufacturerImage(manufacturer, contentImage);
+
+
+	    } catch (Exception e) {
+	      throw new ServiceException(e);
+	    } finally {
+	      try {
+	    	  manufacturer.getImage().close();
+	      } catch (Exception ignore) {
+	      }
+	    }
+	
+}
+
+@Override
+public void removeManufacturerImage(Manufacturer manufacturer) throws ServiceException {
+
+	this.otherAssetsManager.removeManufacturerImage(manufacturer);
+}
+
+@Override
+public void addBannerImage(Banners banner, ImageContentFile contentImage) throws ServiceException {
+
+	try {
+
+	      /** copy to input stream **/
+	      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	      // Fake code simulating the copy
+	      // You can generally do better with nio if you need...
+	      // And please, unlike me, do something about the Exceptions :D
+	      byte[] buffer = new byte[1024];
+	      int len;
+	      while ((len = contentImage.getFile().read(buffer)) > -1) {
+	        baos.write(buffer, 0, len);
+	      }
+	      baos.flush();
+
+	      InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+	      InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+
+	      BufferedImage bufferedImage = ImageIO.read(is2);
+
+	      if (bufferedImage == null) {
+	        LOGGER.error("Cannot read image format for " + banner.getImage());
+	        throw new Exception("Cannot read image format " + banner.getImage());
+	      }
+
+	      // contentImage.setBufferedImage(bufferedImage);
+	      contentImage.setFile(is1);
+
+
+	      // upload original -- L
+	      contentImage.setFileContentType(FileContentType.BANNER);
+	      otherAssetsManager.addBannerImage(banner, contentImage);
+
+
+	    } catch (Exception e) {
+	      throw new ServiceException(e);
+	    } finally {
+	      try {
+	    	  banner.getImage().close();
+	      } catch (Exception ignore) {
+	      }
+	    }
+	
+}
+
+@Override
+public void removeBannerImage(Banners banner) throws ServiceException {
+
+	this.otherAssetsManager.removeBannerImage(banner);
+}
 
 }

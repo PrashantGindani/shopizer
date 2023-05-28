@@ -31,6 +31,7 @@ import com.salesmanager.core.model.common.audit.AuditSection;
 import com.salesmanager.core.model.common.audit.Auditable;
 import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
+import com.salesmanager.core.model.wishlist.WishListItem;
 
 /**
  * <p>Shopping cart is responsible for storing and carrying

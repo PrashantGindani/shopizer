@@ -1,5 +1,6 @@
 package com.salesmanager.core.model.catalog.product.manufacturer;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import javax.validation.constraints.NotEmpty;
@@ -50,7 +52,7 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 	private Set<ManufacturerDescription> descriptions = new HashSet<ManufacturerDescription>();
 	
 	@Column(name = "MANUFACTURER_IMAGE")
-	private String image;
+	private String imageName;
 	
 	@Column(name="SORT_ORDER")
 	private Integer order = new Integer(0);
@@ -62,6 +64,9 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 	@NotEmpty
 	@Column(name="CODE", length=100, nullable=false)
 	private String code;
+	
+	@Transient
+	private InputStream image;
 
 	public Manufacturer() {
 	}
@@ -86,12 +91,12 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 		this.auditSection = auditSection;
 	}
 
-	public String getImage() {
-		return image;
+	public String getImageName() {
+		return imageName;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
+	public void setImageUrl(String imageName) {
+		this.imageName = imageName;
 	}
 
 	public Set<ManufacturerDescription> getDescriptions() {
@@ -124,6 +129,14 @@ public class Manufacturer extends SalesManagerEntity<Long, Manufacturer> impleme
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public InputStream getImage() {
+		return image;
+	}
+
+	public void setImage(InputStream image) {
+		this.image = image;
 	}
 
 

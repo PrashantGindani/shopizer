@@ -1,6 +1,9 @@
 package com.salesmanager.shop.store.controller.manufacturer.facade;
 
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -80,5 +83,9 @@ public interface ManufacturerFacade {
    * @return
    */
   boolean manufacturerExist(MerchantStore store, String manufacturerCode);
+
+  void setImage(Long id, MultipartFile image, MerchantStore store, Language language) throws Exception;
+
+  void deleteImage(Long id, MerchantStore store, Language language) throws Exception;
 
 }

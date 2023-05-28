@@ -577,6 +577,38 @@ public class ShoppingCartFacadeImpl implements ShoppingCartFacade {
 		}
 		return null;
 	}
+	
+	@Override
+	public ReadableShoppingCart findOrAddShoppingCartItem(String cartCode, String sku, MerchantStore merchant, Language language, boolean returnCart) throws Exception
+	{
+		Validate.notNull(cartCode, "Shopping cart code must not be null");
+		Validate.notNull(sku, "product sku must not be null");
+		Validate.notNull(merchant, "MerchantStore must not be null");
+
+		// get cart
+		ShoppingCart cart = getCartModel(cartCode, merchant);
+
+		if (cart == null) {
+			throw new ResourceNotFoundException("Cart code [ " + cartCode + " ] not found");
+		}
+
+		Set<com.salesmanager.core.model.shoppingcart.ShoppingCartItem> items = new HashSet<com.salesmanager.core.model.shoppingcart.ShoppingCartItem>();
+		com.salesmanager.core.model.shoppingcart.ShoppingCartItem itemToDelete = null;
+		for (com.salesmanager.core.model.shoppingcart.ShoppingCartItem shoppingCartItem : cart.getLineItems()) {
+			if (shoppingCartItem.getProduct().getSku().equals(sku)) {
+				//already exists
+				return readableShoppingCartMapper.convert(cart, merchant, language);
+			}
+		}
+		
+		//add if not exists
+		PersistableShoppingCartItem item = new PersistableShoppingCartItem();
+		item.setProduct(sku);
+		item.setQuantity(1);
+
+		return modifyCart(cart, item, merchant, language);
+		
+	}
 
 	// @Override
 	// DELETE

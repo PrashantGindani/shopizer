@@ -152,7 +152,7 @@ public class ProductFacadeV2Impl implements ProductFacade {
 	 */
 
 	@Override
-	public ReadableProductList getProductListsByCriterias(MerchantStore store, Language language,
+	public ReadableProductList getProductListsByCriterias(String user_nick,MerchantStore store, Language language,
 			ProductCriteria criterias) throws Exception {
 		Validate.notNull(criterias, "ProductCriteria must be set for this product");
 

@@ -2,12 +2,15 @@ package com.salesmanager.core.business.services.catalog.product.manufacturer;
 
 
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.modules.cms.product.ProductFileManager;
 import com.salesmanager.core.business.repositories.catalog.product.manufacturer.ManufacturerRepository;
 import com.salesmanager.core.business.repositories.catalog.product.manufacturer.PageableManufacturerRepository;
 import com.salesmanager.core.business.services.common.generic.SalesManagerEntityServiceImpl;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDescription;
+import com.salesmanager.core.model.content.FileContentType;
+import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import org.jsoup.helper.Validate;
@@ -17,8 +20,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.inject.Inject;
+
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 
@@ -36,6 +42,9 @@ public class ManufacturerServiceImpl extends SalesManagerEntityServiceImpl<Long,
   private ManufacturerRepository manufacturerRepository;
 
   @Inject
+  private ProductFileManager productFileManager;
+  
+  @Inject
   public ManufacturerServiceImpl(ManufacturerRepository manufacturerRepository) {
     super(manufacturerRepository);
     this.manufacturerRepository = manufacturerRepository;
@@ -44,6 +53,7 @@ public class ManufacturerServiceImpl extends SalesManagerEntityServiceImpl<Long,
   @Override
   public void delete(Manufacturer manufacturer) throws ServiceException {
     manufacturer = this.getById(manufacturer.getId());
+    removeManufacturerImage(manufacturer);
     super.delete(manufacturer);
   }
 
@@ -148,4 +158,56 @@ public class ManufacturerServiceImpl extends SalesManagerEntityServiceImpl<Long,
     Pageable pageRequest = PageRequest.of(page, count);
     return pageableManufacturerRepository.findByStore(store.getId(), name, pageRequest);
   }
+  
+  @Override
+	public void addManufacturerImage(Manufacturer manufacturer)
+			throws ServiceException {
+
+		ImageContentFile cmsContentImage = new ImageContentFile();
+		try {
+			
+			InputStream inputStream = manufacturer.getImage();
+			cmsContentImage.setFileName(manufacturer.getImageName());
+			cmsContentImage.setFile(inputStream);
+			cmsContentImage.setFileContentType(FileContentType.MANUFACTURER);
+			
+			Assert.notNull(cmsContentImage.getFile(), "ImageContentFile.file cannot be null");
+			productFileManager.addManufacturerImage(manufacturer, cmsContentImage);
+
+			saveOrUpdate(manufacturer);
+
+		} catch (Exception e) {
+			throw new ServiceException(e);
+		} finally {
+			try {
+
+				if (cmsContentImage.getFile() != null) {
+					cmsContentImage.getFile().close();
+				}
+
+			} catch (Exception ignore) {
+
+			}
+		}
+
+	}
+	
+	@Override
+	public void removeManufacturerImage(Manufacturer manufacturer)
+			throws ServiceException {
+
+		try {
+			
+			productFileManager.removeManufacturerImage(manufacturer);
+
+			manufacturer.setImage(null);
+			manufacturer.setImageUrl(null);
+			
+			saveOrUpdate(manufacturer);
+
+		} catch (Exception e) {
+			throw new ServiceException(e);
+		}
+
+	}
 }

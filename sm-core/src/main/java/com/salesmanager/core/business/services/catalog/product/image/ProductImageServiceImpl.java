@@ -194,6 +194,16 @@ public class ProductImageServiceImpl extends SalesManagerEntityServiceImpl<Long,
 
 		return image;
 	}
+	
+
+	@Override
+	public List<ProductImage> getProductAllImages(Long productId, MerchantStore store) {
+
+		List<ProductImage> img = productImageRepository.findImagesByProdId(productId, store.getCode());
+
+		return img;
+	}
+
 
 	@Override
 	public void updateProductImage(Product product, ProductImage productImage) {

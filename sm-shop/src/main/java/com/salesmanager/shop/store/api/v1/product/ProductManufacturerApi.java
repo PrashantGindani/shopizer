@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.api.v1.product;
 
+import static org.springframework.http.HttpStatus.OK;
+
 import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.salesmanager.core.business.services.catalog.product.manufacturer.ManufacturerService;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.merchant.MerchantStore;
@@ -28,6 +32,7 @@ import com.salesmanager.shop.model.catalog.manufacturer.ReadableManufacturer;
 import com.salesmanager.shop.model.catalog.manufacturer.ReadableManufacturerList;
 import com.salesmanager.shop.model.entity.EntityExists;
 import com.salesmanager.shop.model.entity.ListCriteria;
+import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.controller.manufacturer.facade.ManufacturerFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -226,6 +231,38 @@ public class ProductManufacturerApi {
 
 		return manufacturerFacade.getByProductInCategory(merchantStore, language, id);
 
+	}
+	
+	@ResponseStatus(OK)
+	@RequestMapping(value = { "/private/manufacturer/{id}/image"}, consumes = {
+			MediaType.MULTIPART_FORM_DATA_VALUE }, method = RequestMethod.PUT)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+	public void imageUpload(@PathVariable("id") Long id, 
+			@RequestParam(value = "file", required = true) MultipartFile file,
+			@ApiIgnore MerchantStore merchantstore, @ApiIgnore Language language) {
+		try {
+
+		manufacturerFacade.setImage(id, file, merchantstore, language);
+		} catch (Exception e) {
+			LOGGER.error("Error while creating manufacturer Image", e);
+			throw new ServiceRuntimeException("Error while creating manufacturer image");
+		}
+	}
+	
+	@ResponseStatus(OK)
+	@RequestMapping(value = { "/private/manufacturer/{id}/image"}, method = RequestMethod.DELETE)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+	public void imageDelete(@PathVariable("id") Long id, 
+			@ApiIgnore MerchantStore merchantstore, @ApiIgnore Language language) {
+		try {
+
+			manufacturerFacade.deleteImage(id, merchantstore, language);
+		} catch (Exception e) {
+			LOGGER.error("Error while creating manufacturer Image", e);
+			throw new ServiceRuntimeException("Error while creating manufacturer image");
+		}
 	}
 
 }

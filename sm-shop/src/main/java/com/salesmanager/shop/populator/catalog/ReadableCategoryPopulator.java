@@ -1,6 +1,8 @@
 package com.salesmanager.shop.populator.catalog;
 
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.utils.AbstractDataPopulator;
@@ -8,12 +10,21 @@ import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.catalog.category.ReadableCategory;
+import com.salesmanager.shop.utils.ImageFilePath;
 
 public class ReadableCategoryPopulator extends
         AbstractDataPopulator<Category, ReadableCategory> {
+	
 
-    @Override
+	private ImageFilePath imageUtils;
+
+	public ReadableCategoryPopulator(ImageFilePath imageUtils) {
+		this.imageUtils = imageUtils;
+	}
+	
+	@Override
     public ReadableCategory populate(final Category source,
             final ReadableCategory target,
             final MerchantStore store,
@@ -65,7 +76,8 @@ public class ReadableCategoryPopulator extends
         target.setSortOrder(source.getSortOrder());
         target.setVisible(source.isVisible());
         target.setFeatured(source.isFeatured());
-
+        target.setImgUrl(imageUtils.buildOtherAssetFilePath(store, Constants.CATEGORY_URI, source.getCategoryImage()));
+        
         return target;
 
     }

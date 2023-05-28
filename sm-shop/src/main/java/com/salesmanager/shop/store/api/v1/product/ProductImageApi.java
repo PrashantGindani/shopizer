@@ -2,6 +2,7 @@ package com.salesmanager.shop.store.api.v1.product;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -286,8 +287,29 @@ public class ProductImageApi {
 						+ "] and merchant [" + merchantStore.getCode() + "]");
 			}
 			
+			List<ProductImage> pps = productImageService.getProductAllImages(id, merchantStore);
+			
 			Optional<ProductImage> productImage = productImageService.getProductImage(imageId, id, merchantStore);
-
+			
+			Collections.sort(pps, (a,b) -> (int)(a.getSortOrder()==b.getSortOrder()?a.getId()-b.getId():a.getSortOrder()-b.getSortOrder()));
+			
+			int count=1;
+			for(ProductImage img : pps) {
+				if(count==position && productImage.isPresent() ) { count++; }
+				if(img.getId()==imageId) {
+					productImage.get().setSortOrder(position);
+					productImageService.updateProductImage(p, productImage.get());
+					continue;
+				}
+				else {
+					img.setSortOrder(count);
+					productImageService.updateProductImage(p, img);					
+				}
+				
+				count++;
+				
+			}
+			
 			if (productImage.isPresent()) {
 				productImage.get().setSortOrder(position);
 				productImageService.updateProductImage(p, productImage.get());

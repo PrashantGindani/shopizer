@@ -12,6 +12,7 @@ public class ReadableCategory extends CategoryEntity {
 	private CategoryDescription description;//one category based on language
 	private int productCount;
 	private String store;
+	private String imgUrl;
 	private List<ReadableCategory> children = new ArrayList<ReadableCategory>();
 	
 	
@@ -40,5 +41,12 @@ public class ReadableCategory extends CategoryEntity {
 	public void setStore(String store) {
 		this.store = store;
 	}
+	public String getImgUrl() {
+		return imgUrl;
+	}
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+	
 
 }

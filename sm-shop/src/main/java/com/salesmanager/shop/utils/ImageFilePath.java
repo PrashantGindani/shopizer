@@ -108,5 +108,21 @@ public interface ImageFilePath {
 	 */
 	public String buildStaticContentFilePath(MerchantStore store, String fileName);
 
-
+	/**
+	 * Builds image file url path for other assets
+	 * @param store
+	 * @param assetPath
+	 * @param imageName
+	 * @return
+	 */
+	public String buildOtherAssetFilePath(MerchantStore store,String assetPath, String fileName);
+	
+	/**
+	 * Builds image file url path for other assets
+	 * @param store
+	 * @param assetPath
+	 * @param imageName
+	 * @return
+	 */
+	public String buildOtherAssetFilePathWithoutStore(MerchantStore store,String assetPath, String fileName);
 }

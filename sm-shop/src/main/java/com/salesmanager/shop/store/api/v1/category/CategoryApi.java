@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +24,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -33,9 +38,12 @@ import com.salesmanager.shop.model.catalog.category.ReadableCategory;
 import com.salesmanager.shop.model.catalog.category.ReadableCategoryList;
 import com.salesmanager.shop.model.entity.EntityExists;
 import com.salesmanager.shop.model.entity.ListCriteria;
+import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.api.exception.UnauthorizedException;
+import com.salesmanager.shop.store.api.v1.product.ProductImageApi;
 import com.salesmanager.shop.store.controller.category.facade.CategoryFacade;
 import com.salesmanager.shop.store.controller.user.facade.UserFacade;
+import com.salesmanager.shop.utils.ImageFilePath;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -55,12 +63,17 @@ import springfox.documentation.annotations.ApiIgnore;
 public class CategoryApi {
 
 	private static final int DEFAULT_CATEGORY_DEPTH = 0;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryApi.class);
 
 	@Inject
 	private CategoryFacade categoryFacade;
 
 	@Inject
 	private UserFacade userFacade;
+
+	@Inject
+	@Qualifier("img")
+	private ImageFilePath imageUtils;
 
 	@GetMapping(value = "/category/{id}", produces = { APPLICATION_JSON_VALUE })
 	@ApiOperation(httpMethod = "GET", value = "Get category list for an given Category id", notes = "List current Category and child category")
@@ -235,4 +248,36 @@ public class CategoryApi {
 		categoryFacade.deleteCategory(categoryId, merchantStore);
 	}
 
+	@ResponseStatus(OK)
+	@RequestMapping(value = { "/private/category/{id}/image"}, consumes = {
+			MediaType.MULTIPART_FORM_DATA_VALUE }, method = RequestMethod.PUT)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+	public void imageUpload(@PathVariable("id") Long categoryId, 
+			@RequestParam(value = "file", required = true) MultipartFile file,
+			@ApiIgnore MerchantStore merchantstore, @ApiIgnore Language language) {
+		try {
+
+		categoryFacade.setImageSVG(categoryId, file, merchantstore, language);
+		} catch (Exception e) {
+			LOGGER.error("Error while creating CategoryImage", e);
+			throw new ServiceRuntimeException("Error while creating image");
+		}
+	}
+	
+	@ResponseStatus(OK)
+	@RequestMapping(value = { "/private/category/{id}/image"}, method = RequestMethod.DELETE)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })
+	public void imageDelete(@PathVariable("id") Long categoryId, 
+			@ApiIgnore MerchantStore merchantstore, @ApiIgnore Language language) {
+		try {
+
+		categoryFacade.deleteImageSVG(categoryId, merchantstore, language);
+		} catch (Exception e) {
+			LOGGER.error("Error while creating CategoryImage", e);
+			throw new ServiceRuntimeException("Error while creating image");
+		}
+	}
+	
 }

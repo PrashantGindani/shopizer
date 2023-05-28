@@ -67,6 +67,8 @@ public class Constants {
 	public final static String SMALL_IMAGE= "SMALL";
 	public final static String LARGE_IMAGE= "LARGE";
 	public final static String CATEGORY_URI = "/category";
+	public final static String MANUFACTURER_URI = "/manufacturer";
+	public final static String BANNER_URI = "/banner";
 	public final static String PRODUCT_ID_URI= "/productid";
 	public final static String ORDER_DOWNLOAD_URI= "/order/download";
 

@@ -4,6 +4,6 @@ import java.io.Serializable;
 import com.salesmanager.core.business.modules.cms.common.AssetsManager;
 
 public interface ProductAssetsManager
-    extends AssetsManager, ProductImageGet, ProductImagePut, ProductImageRemove, Serializable {
+    extends AssetsManager,OtherAssetsManager, ProductImageGet, ProductImagePut, ProductImageRemove, Serializable {
 
 }

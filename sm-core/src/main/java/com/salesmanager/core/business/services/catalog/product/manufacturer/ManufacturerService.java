@@ -58,5 +58,9 @@ public interface ManufacturerService extends SalesManagerEntityService<Long, Man
 	
 	int count(MerchantStore store);
 
+	void addManufacturerImage(Manufacturer manufacturer) throws ServiceException;
+
+	void removeManufacturerImage(Manufacturer manufacturer) throws ServiceException;
+
 	
 }

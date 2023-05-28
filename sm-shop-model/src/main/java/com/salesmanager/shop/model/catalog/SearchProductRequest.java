@@ -46,4 +46,9 @@ public class SearchProductRequest implements Serializable {
 		this.count = count;
 	}
 
+	@Override
+	public String toString() {
+		return "SearchProductRequest [query=" + query + ", count=" + count + ", start=" + start + "]";
+	}
+
 }

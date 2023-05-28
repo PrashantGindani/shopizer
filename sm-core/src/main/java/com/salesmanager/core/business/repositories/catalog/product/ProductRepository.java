@@ -11,10 +11,10 @@ import com.salesmanager.core.model.catalog.product.Product;
 public interface ProductRepository extends JpaRepository<Product, Long>, ProductRepositoryCustom {
 
 	
-	@Query(value="select case when count(p)> 0 then true else false end"
-			+ " from Product p join p.merchantStore pm"
-			+ " left join p.Variants pinst "
-			+ " where pinst.sku=?1 or p.sku=?1 and pm.id=?2",nativeQuery = true)
+	@Query(value="select case when count(p.PRODUCT_ID)> 0 then 'true' else 'false' end"
+			+ " from {h-schema}Product p join {h-schema}MERCHANT_STORE pm ON p.MERCHANT_ID = pm.MERCHANT_ID "
+			+ " left join {h-schema}PRODUCT_VARIANT pinst ON pinst.PRODUCT_ID = p.PRODUCT_ID "
+			+ " where pinst.sku=?1 or p.sku=?1 and pm.MERCHANT_ID=?2",nativeQuery = true)
 	boolean existsBySku(String sku, Integer store);
 	
 	@Query(

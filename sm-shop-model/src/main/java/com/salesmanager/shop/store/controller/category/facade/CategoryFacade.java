@@ -1,6 +1,10 @@
 package com.salesmanager.shop.store.controller.category.facade;
 
+import java.io.InputStream;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -110,4 +114,8 @@ public interface CategoryFacade {
 	 * @return
 	 */
 	ReadableCategoryList listByProduct(MerchantStore store, Long product, Language language);
+
+	void setImageSVG(Long categoryId, MultipartFile image, MerchantStore store, Language language)  throws Exception ;
+
+	void deleteImageSVG(Long categoryId, MerchantStore store, Language language) throws Exception;
 }

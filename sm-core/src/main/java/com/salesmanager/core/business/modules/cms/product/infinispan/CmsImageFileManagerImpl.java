@@ -20,9 +20,12 @@ import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.cms.impl.CMSManager;
 import com.salesmanager.core.business.modules.cms.impl.CacheManager;
 import com.salesmanager.core.business.modules.cms.product.ProductAssetsManager;
+import com.salesmanager.core.model.banner.Banners;
+import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.content.FileContentType;
 import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.content.OutputContentFile;
@@ -471,6 +474,47 @@ public class CmsImageFileManagerImpl implements ProductAssetsManager {
     return rootName;
   }
 
+  @Override
+  public void addCategoryImage(Category category, ImageContentFile contentImage) throws ServiceException {
+  	// TODO Auto-generated method stub
+  	LOGGER.error("Other Asset Manager Error");
+      //throw new ServiceException("Other Asset Manager Error");
+  }
 
+  @Override
+  public void removeCategoryImage(Category category) throws ServiceException {
+  	// TODO Auto-generated method stub
+
+  	LOGGER.error("Other Asset Manager Error");
+      //throw new ServiceException("Other Asset Manager Error");
+  }
+
+@Override
+public void removeManufacturerImage(Manufacturer manufacturer) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    //throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void addManufacturerImage(Manufacturer manufacturer, ImageContentFile contentImage) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    //throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void addBannerImage(Banners banner, ImageContentFile contentImage) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    //throw new ServiceException("Other Asset Manager Error");
+}
+
+@Override
+public void removeBannerImage(Banners banner) throws ServiceException {
+	// TODO Auto-generated method stub
+	LOGGER.error("Other Asset Manager Error");
+    //throw new ServiceException("Other Asset Manager Error");
+}
 
 }

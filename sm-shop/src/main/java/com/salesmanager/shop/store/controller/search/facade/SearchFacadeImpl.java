@@ -30,7 +30,7 @@ import com.salesmanager.shop.model.entity.ValueList;
 import com.salesmanager.shop.populator.catalog.ReadableCategoryPopulator;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
 import com.salesmanager.shop.store.api.exception.ConversionRuntimeException;
-import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
+import com.salesmanager.shop.store.api.exception.*;
 import com.salesmanager.shop.utils.ImageFilePath;
 
 import modules.commons.search.request.Aggregation;
@@ -144,7 +144,7 @@ public class SearchFacadeImpl implements SearchFacade {
 
 	private ReadableCategory convertCategoryToReadableCategory(MerchantStore merchantStore, Language language,
 			Map<String, Long> productCategoryCount, Category category) {
-		ReadableCategoryPopulator populator = new ReadableCategoryPopulator();
+		ReadableCategoryPopulator populator = new ReadableCategoryPopulator(imageUtils);
 		try {
 			ReadableCategory categoryProxy = populator.populate(category, new ReadableCategory(), merchantStore,
 					language);

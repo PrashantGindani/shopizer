@@ -1,5 +1,6 @@
 package com.salesmanager.core.model.catalog.category;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -88,6 +90,9 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
     @NotEmpty
     @Column(name="CODE", length=100, nullable=false)
     private String code;
+    
+    @Transient
+    private InputStream imageSvg = null;
 
     public String getCode() {
         return code;
@@ -224,5 +229,13 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
     public void setDescriptions(Set<CategoryDescription> descriptions) {
       this.descriptions = descriptions;
     }
+
+	public InputStream getImageSvg() {
+		return imageSvg;
+	}
+
+	public void setImageSvg(InputStream imageSvg) {
+		this.imageSvg = imageSvg;
+	}
 
 }

@@ -47,6 +47,7 @@ import com.salesmanager.core.model.generic.SalesManagerEntity;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.core.model.user.Group;
+import com.salesmanager.core.model.wishlist.WishListItem;
 import com.salesmanager.core.utils.CloneUtils;
 
 @Entity
@@ -115,6 +116,9 @@ public class Customer extends SalesManagerEntity<Long, Customer> implements Audi
 	@OneToMany(mappedBy = "customer", targetEntity = ProductReview.class)
 	private List<ProductReview> reviews = new ArrayList<ProductReview>();
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer")
+	private Set<WishListItem> wishlistItems = new HashSet<WishListItem>();
+
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="MERCHANT_ID", nullable=false)
@@ -354,5 +358,12 @@ public class Customer extends SalesManagerEntity<Long, Customer> implements Audi
 	public void setCredentialsResetRequest(CredentialsReset credentialsResetRequest) {
 		this.credentialsResetRequest = credentialsResetRequest;
 	}
-	
+
+	public Set<WishListItem> getWishlistItems() {
+		return wishlistItems;
+	}
+
+	public void setWishlistItems(Set<WishListItem> wishlistItems) {
+		this.wishlistItems = wishlistItems;
+	}
 }

@@ -1,5 +1,6 @@
 package com.salesmanager.core.business.services.catalog.category;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,14 +10,18 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.salesmanager.core.business.configuration.events.products.SaveProductImageEvent;
 import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.exception.ServiceException;
+import com.salesmanager.core.business.modules.cms.product.ProductFileManager;
 import com.salesmanager.core.business.repositories.catalog.category.CategoryDescriptionRepository;
 import com.salesmanager.core.business.repositories.catalog.category.CategoryRepository;
 import com.salesmanager.core.business.repositories.catalog.category.PageableCategoryRepository;
@@ -25,6 +30,9 @@ import com.salesmanager.core.business.services.common.generic.SalesManagerEntity
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.catalog.product.image.ProductImage;
+import com.salesmanager.core.model.content.FileContentType;
+import com.salesmanager.core.model.content.ImageContentFile;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 
@@ -43,7 +51,11 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
   @Inject
   private CategoryDescriptionRepository categoryDescriptionRepository;
 
+  @Inject
+  private ProductFileManager productFileManager;
 
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
 
   @Inject
   public CategoryServiceImpl(CategoryRepository categoryRepository) {
@@ -278,6 +290,7 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 			}
 
 			Category categ = getById(category.getId(), category.getMerchantStore().getId());
+			removeCategoryImage(categ);
 			categoryRepository.delete(categ);
 
 		}
@@ -428,4 +441,66 @@ public class CategoryServiceImpl extends SalesManagerEntityServiceImpl<Long, Cat
 		return categoryRepository.listByProduct(store, productId);
 	}
 
+	@Override
+	public void addCategoryImage(Category category)
+			throws ServiceException {
+
+		ImageContentFile cmsContentImage = new ImageContentFile();
+		try {
+			
+			InputStream inputStream = category.getImageSvg();
+			cmsContentImage.setFileName(category.getCategoryImage());
+			cmsContentImage.setFile(inputStream);
+			cmsContentImage.setFileContentType(FileContentType.CATEGORY);
+			
+			Assert.notNull(cmsContentImage.getFile(), "ImageContentFile.file cannot be null");
+			productFileManager.addCategoryImage(category, cmsContentImage);
+
+			saveOrUpdate(category);
+
+		} catch (Exception e) {
+			throw new ServiceException(e);
+		} finally {
+			try {
+
+				if (cmsContentImage.getFile() != null) {
+					cmsContentImage.getFile().close();
+				}
+
+			} catch (Exception ignore) {
+
+			}
+		}
+
+	}
+	
+	@Override
+	public void removeCategoryImage(Category category)
+			throws ServiceException {
+
+		ImageContentFile cmsContentImage = new ImageContentFile();
+		try {
+			
+			productFileManager.removeCategoryImage(category);
+
+			category.setImageSvg(null);
+			category.setCategoryImage(null);
+			
+			saveOrUpdate(category);
+
+		} catch (Exception e) {
+			throw new ServiceException(e);
+		} finally {
+			try {
+
+				if (cmsContentImage.getFile() != null) {
+					cmsContentImage.getFile().close();
+				}
+
+			} catch (Exception ignore) {
+
+			}
+		}
+
+	}
 }

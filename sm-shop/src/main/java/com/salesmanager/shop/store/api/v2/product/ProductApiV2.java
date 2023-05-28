@@ -2,6 +2,9 @@ package com.salesmanager.shop.store.api.v2.product;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.security.Principal;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -220,10 +223,14 @@ public class ProductApiV2 {
 			// allowing
 			// navigation
 			@RequestParam(value = "count", required = false, defaultValue = "100") Integer count, // count
+			@RequestParam(value = "page", required = false, defaultValue = "0") Integer page, // count
 			// per
 			// page
-			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language) {
+			@ApiIgnore MerchantStore merchantStore, @ApiIgnore Language language,
+			HttpServletRequest request, HttpServletResponse response) {
 
+		Principal principal = request.getUserPrincipal();
+		String userName = principal!=null? principal.getName():"";
 		
 		if (!StringUtils.isBlank(searchCriterias.getSku())) {
 			searchCriterias.setCode(searchCriterias.getSku());
@@ -234,10 +241,11 @@ public class ProductApiV2 {
 		}
 		
 		searchCriterias.setMaxCount(count);
+		searchCriterias.setStartPage(page);
 		searchCriterias.setLanguage(language.getCode());
 
 		try {
-			return productFacadeV2.getProductListsByCriterias(merchantStore, language, searchCriterias);
+			return productFacadeV2.getProductListsByCriterias(userName,merchantStore, language, searchCriterias);
 
 		} catch (Exception e) {
 			LOGGER.error("Error while filtering products product", e);

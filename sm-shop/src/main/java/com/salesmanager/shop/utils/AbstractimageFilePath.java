@@ -26,6 +26,8 @@ public abstract class AbstractimageFilePath implements ImageFilePath {
 	public abstract void setContentUrlPath(String contentUrl);
 	
 	protected static final String CONTEXT_PATH = "CONTEXT_PATH";
+
+	public static final String CATEGORY_ROOT = "categories";
 	
 	public @Resource(name="shopizer-properties") Properties properties = new Properties();//shopizer-properties
 
@@ -170,9 +172,41 @@ public abstract class AbstractimageFilePath implements ImageFilePath {
 		return sb.toString();
 	}
 	
-
+	/**
+	 * Builds image file url path for other assets
+	 * @param store
+	 * @param assetPath
+	 * @param imageName
+	 * @return
+	 */
+	public String buildOtherAssetFilePath(MerchantStore store,String assetPath, String fileName) {
+		StringBuilder sb = new StringBuilder().append(getBasePath(store)).append(assetPath).append(Constants.SLASH).append(store.getCode()).append(Constants.SLASH);
+		if(!StringUtils.isBlank(fileName)) {
+			sb.append(fileName);
+		}
+		else {
+			return "";
+		}
+		return sb.toString();
+	}
 	
 	
-
+	/**
+	 * Builds image file url path for other assets
+	 * @param store
+	 * @param assetPath
+	 * @param imageName
+	 * @return
+	 */
+	public String buildOtherAssetFilePathWithoutStore(MerchantStore store,String assetPath, String fileName) {
+		StringBuilder sb = new StringBuilder().append(getBasePath(store)).append(assetPath).append(Constants.SLASH);
+		if(!StringUtils.isBlank(fileName)) {
+			sb.append(fileName);
+		}
+		else {
+			return "";
+		}
+		return sb.toString();
+	}
 
 }

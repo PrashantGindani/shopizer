@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.facade.category;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,8 +17,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
@@ -24,6 +29,7 @@ import com.salesmanager.core.business.services.catalog.category.CategoryService;
 import com.salesmanager.core.business.services.catalog.product.attribute.ProductAttributeService;
 import com.salesmanager.core.business.services.merchant.MerchantStoreService;
 import com.salesmanager.core.model.catalog.category.Category;
+import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOption;
 import com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription;
@@ -44,6 +50,7 @@ import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.api.exception.UnauthorizedException;
 import com.salesmanager.shop.store.controller.category.facade.CategoryFacade;
+import com.salesmanager.shop.utils.ImageFilePath;
 
 @Service(value = "categoryFacade")
 public class CategoryFacadeImpl implements CategoryFacade {
@@ -63,6 +70,10 @@ public class CategoryFacadeImpl implements CategoryFacade {
 	@Inject
 	private ProductAttributeService productAttributeService;
 
+	@Inject
+	@Qualifier("img")
+	private ImageFilePath imageUtils;
+	
 	private static final String FEATURED_CATEGORY = "featured";
 	private static final String VISIBLE_CATEGORY = "visible";
 	private static final String ADMIN_CATEGORY = "admin";
@@ -313,7 +324,7 @@ public class CategoryFacadeImpl implements CategoryFacade {
 	public ReadableCategory getByCode(MerchantStore store, String code, Language language) throws Exception {
 
 		Validate.notNull(code, "category code must not be null");
-		ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator();
+		ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator(imageUtils);
 		ReadableCategory readableCategory = new ReadableCategory();
 
 		Category category = categoryService.getByCode(store, code);
@@ -325,7 +336,7 @@ public class CategoryFacadeImpl implements CategoryFacade {
 	@Override
 	public ReadableCategory getCategoryByFriendlyUrl(MerchantStore store, String friendlyUrl, Language language) throws Exception {
 		Validate.notNull(friendlyUrl, "Category search friendly URL must not be null");
-		ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator();
+		ReadableCategoryPopulator categoryPopulator = new ReadableCategoryPopulator(imageUtils);
 		ReadableCategory readableCategory = new ReadableCategory();
 
 		Category category = categoryService.getBySeUrl(store, friendlyUrl);
@@ -554,5 +565,54 @@ public class CategoryFacadeImpl implements CategoryFacade {
 
 		
 		return readableList;
+	}
+	
+	@Override
+	public void setImageSVG(Long categoryId, MultipartFile image, MerchantStore store, Language language) throws Exception {
+		
+		Validate.notNull(categoryId, "Category id must not be null");
+		Validate.notNull(image, "Image must not be null");
+		Validate.notNull(store, "Store must not be null");
+		
+		Category cc= categoryService.getById(categoryId);
+		if(cc==null) {
+			throw new ServiceRuntimeException("Error no category [" + categoryId + "] exists");
+		}
+
+		// security validation
+		// product belongs to merchant store
+		if (cc.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+			throw new UnauthorizedException("Resource not authorized for this merchant");
+		}
+		
+		cc.setCategoryImage("C"+categoryId+"-"+image.getOriginalFilename());
+		cc.setImageSvg(image.getInputStream());
+		
+		categoryService.addCategoryImage(cc);
+		
+		//categoryService.saveOrUpdate(cc);
+	}
+	
+	@Override
+	public void deleteImageSVG(Long categoryId, MerchantStore store, Language language) throws Exception {
+		
+		Validate.notNull(categoryId, "Category id must not be null");
+		Validate.notNull(store, "Store must not be null");
+		
+		Category cc= categoryService.getById(categoryId);
+		if(cc==null) {
+			throw new ServiceRuntimeException("Error no category [" + categoryId + "] exists");
+		}
+
+		// security validation
+		// product belongs to merchant store
+		if (cc.getMerchantStore().getId().intValue() != store.getId().intValue()) {
+			throw new UnauthorizedException("Resource not authorized for this merchant");
+		}
+		
+		
+		categoryService.removeCategoryImage(cc);
+		
+		//categoryService.saveOrUpdate(cc);
 	}
 }

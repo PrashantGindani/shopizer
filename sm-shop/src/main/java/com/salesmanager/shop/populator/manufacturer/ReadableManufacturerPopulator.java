@@ -5,8 +5,11 @@ import com.salesmanager.core.business.utils.AbstractDataPopulator;
 import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDescription;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.catalog.manufacturer.ReadableManufacturer;
 import com.salesmanager.shop.model.catalog.manufacturer.ReadableManufacturerFull;
+import com.salesmanager.shop.utils.ImageFilePath;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -14,9 +17,13 @@ import java.util.Set;
 public class ReadableManufacturerPopulator extends
     AbstractDataPopulator<com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer, ReadableManufacturer> {
 
+	private ImageFilePath imageUtils;
 
+  public ReadableManufacturerPopulator(ImageFilePath imageUtils) {
+		this.imageUtils=imageUtils;
+	}
 
-  @Override
+@Override
   public ReadableManufacturer populate(
       com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer source,
       ReadableManufacturer target, MerchantStore store, Language language)
@@ -28,6 +35,7 @@ public class ReadableManufacturerPopulator extends
     }
     target.setOrder(source.getOrder());
     target.setId(source.getId());
+    target.setImageUrl(imageUtils.buildOtherAssetFilePath(store, Constants.MANUFACTURER_URI, source.getImageName()));
     target.setCode(source.getCode());
     if (source.getDescriptions() != null && source.getDescriptions().size() > 0) {
 
