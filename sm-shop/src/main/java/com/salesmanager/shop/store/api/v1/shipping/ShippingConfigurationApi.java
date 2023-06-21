@@ -277,6 +277,7 @@ public class ShippingConfigurationApi {
 			integrationConfiguration.setDefaultSelected(configuration.isDefaultSelected());
 			integrationConfiguration.setIntegrationKeys(configuration.getIntegrationKeys());
 			integrationConfiguration.setIntegrationOptions(configuration.getIntegrationOptions());
+			integrationConfiguration.setModuleCode(configuration.getCode());
 
 			shippingService.saveShippingQuoteModuleConfiguration(integrationConfiguration, merchantStore);
 

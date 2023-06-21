@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,7 @@ import com.salesmanager.shop.model.order.v0.ReadableOrderList;
 import com.salesmanager.shop.model.order.v1.PersistableAnonymousOrder;
 import com.salesmanager.shop.model.order.v1.PersistableOrder;
 import com.salesmanager.shop.model.order.v1.ReadableOrderConfirmation;
+import com.salesmanager.shop.model.shoppingcart.ReadableShoppingCart;
 import com.salesmanager.shop.populator.customer.ReadableCustomerPopulator;
 import com.salesmanager.shop.store.api.exception.GenericRuntimeException;
 import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
@@ -367,6 +369,11 @@ public class OrderApi {
 			ShoppingCart cart = shoppingCartService.getByCode(code, merchantStore);
 			if (cart == null) {
 				throw new ResourceNotFoundException("Cart code " + code + " does not exist");
+			}
+			if(cart.getOrderId()!=null &&  cart.getOrderId()>0) {
+				//old give cart has been ordered. So get new Cart
+				
+				throw new ResourceNotFoundException("Already Order placed for the Cart code " + code + "");
 			}
 
 			order.setShoppingCartId(cart.getId());

@@ -519,7 +519,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
           throw new ConversionException("Unsuported zone code " + address.getZone());
         }
         customerModel.getBilling().setZone(zone);
-        customerModel.getBilling().setState(null);
+        customerModel.getBilling().setState(address.getStateProvince());
 
       } else {
         customerModel.getBilling().setZone(null);
@@ -539,7 +539,7 @@ public class CustomerFacadeImpl implements CustomerFacade {
         }
 
         customerModel.getDelivery().setZone(zone);
-        customerModel.getDelivery().setState(null);
+        customerModel.getDelivery().setState(address.getStateProvince());
 
       } else {
         customerModel.getDelivery().setZone(null);
@@ -1049,13 +1049,13 @@ public class CustomerFacadeImpl implements CustomerFacade {
     	  customer.getDelivery().setAddress(customer.getBilling().getAddress());
       }
       if(StringUtils.isBlank(customer.getDelivery().getCity())) {
-    	  customer.getDelivery().setAddress(customer.getBilling().getCity());
+    	  customer.getDelivery().setCity(customer.getBilling().getCity());
       }
       if(StringUtils.isBlank(customer.getDelivery().getPostalCode())) {
-    	  customer.getDelivery().setAddress(customer.getBilling().getPostalCode());
+    	  customer.getDelivery().setPostalCode(customer.getBilling().getPostalCode());
       }
       if(StringUtils.isBlank(customer.getDelivery().getCountryCode())) {
-    	  customer.getDelivery().setAddress(customer.getDelivery().getCountryCode());
+    	  customer.getDelivery().setCountryCode(customer.getBilling().getCountryCode());
       }
     }
     

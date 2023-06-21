@@ -11,11 +11,13 @@ public class GenericRuntimeException extends RuntimeException {
   private String errorMessage;
 
   public GenericRuntimeException(String errorCode, String errorMessage) {
+    super(errorMessage);
     this.setErrorCode(errorCode);
     this.setErrorMessage(errorMessage);
   }
 
   public GenericRuntimeException(String errorMessage) {
+	super(errorMessage);
     this.setErrorMessage(errorMessage);
   }
 

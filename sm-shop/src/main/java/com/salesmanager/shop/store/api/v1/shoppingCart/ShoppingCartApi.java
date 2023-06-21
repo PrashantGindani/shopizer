@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.api.v1.shoppingCart;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.security.Principal;
@@ -14,6 +16,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,6 +36,7 @@ import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.model.customer.Customer;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
+import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.shop.model.shoppingcart.PersistableShoppingCartItem;
 import com.salesmanager.shop.model.shoppingcart.ReadableShoppingCart;
 import com.salesmanager.shop.store.api.exception.OperationNotAllowedException;
@@ -40,7 +44,10 @@ import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.controller.customer.facade.v1.CustomerFacade;
 import com.salesmanager.shop.store.controller.shoppingCart.facade.ShoppingCartFacade;
+import com.salesmanager.shop.store.security.JWTTokenUtil;
+import com.salesmanager.shop.store.security.common.CustomAuthenticationException;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -56,6 +63,9 @@ import springfox.documentation.annotations.ApiIgnore;
 		@Tag(name = "Shopping cart resource", description = "Add, remove and retrieve shopping carts") })
 public class ShoppingCartApi {
 
+    @Value("${authToken.header}")
+    private String tokenHeader;
+    
 	@Inject
 	private ShoppingCartFacade shoppingCartFacade;
 
@@ -65,6 +75,9 @@ public class ShoppingCartApi {
 	@Inject
 	private CustomerService customerService;
 
+	@Inject
+	private JWTTokenUtil jwtTokenUtil;
+	
 	@Autowired
 	private CustomerFacade customerFacadev1;
 	
@@ -72,6 +85,7 @@ public class ShoppingCartApi {
 	private com.salesmanager.shop.store.controller.customer.facade.CustomerFacade customerFacade;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShoppingCartApi.class);
+	private static final String BEARER = "Bearer";
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/cart")
@@ -94,9 +108,44 @@ public class ShoppingCartApi {
 			@Valid @RequestBody PersistableShoppingCartItem shoppingCartItem, 
 			@ApiIgnore MerchantStore merchantStore,
 			@ApiIgnore Language language, 
+			HttpServletRequest request,
 			HttpServletResponse response) {
+		
+		Principal principal = request.getUserPrincipal();
+		String userName = principal!=null? principal.getName():"";
+		String requestHeader = request.getHeader(tokenHeader);// token
+		Customer cc =null;
+		if(principal==null && requestHeader!=null && !requestHeader.isEmpty()) {
+		    String authToken;
 
+		    authToken = ofNullable(requestHeader).map(value -> removeStart(value, BEARER)).map(String::trim)
+		        .orElseThrow(() -> new CustomAuthenticationException("Missing Authentication Token"));
+
+		    try {
+		    	userName = jwtTokenUtil.getUsernameFromToken(authToken);
+		    	cc = customerService.getByNick(userName);
+		    } catch (IllegalArgumentException e) {
+		      LOGGER.error("an error occured during getting username from token", e);
+		    } catch (ExpiredJwtException e) {
+		      LOGGER.warn("the token is expired and not valid anymore", e);
+		    }
+		}
+		
 		try {
+			
+			ShoppingCart cartModel = shoppingCartFacade.getShoppingCartModel(code, merchantStore);
+			if(cartModel !=null && cartModel.getOrderId()!=null &&  cartModel.getOrderId()>0) {
+				//old cart has been ordered. So get new Cart
+				ReadableShoppingCart shopcart = null;
+				if(cc==null) {
+					shopcart =  shoppingCartFacade.addToCart(shoppingCartItem, merchantStore, language);
+				}
+				else {
+					shopcart =  shoppingCartFacade.addToCart(cc,shoppingCartItem, merchantStore, language);
+				}
+				return new ResponseEntity<>(shopcart, HttpStatus.CREATED);
+			}
+			
 			ReadableShoppingCart cart = shoppingCartFacade.modifyCart(code, shoppingCartItem, merchantStore, language);
 
 			if (cart == null) {

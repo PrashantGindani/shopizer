@@ -125,7 +125,7 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	 * Decorates the product with variants
 	 * 
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "product")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<ProductVariant> variants = new HashSet<ProductVariant>();
 	
 	@Column(name="DATE_AVAILABLE")
@@ -213,7 +213,9 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	
 	@Column(name="RENTAL_PERIOD", nullable = true)
 	private Integer rentalPeriod;
-	
+
+	@Transient
+	private String imgUrlPath;
 
 	public Integer getRentalPeriod() {
 		return rentalPeriod;
@@ -549,6 +551,14 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 
 	public void setProductShipeable(boolean productShipeable) {
 		this.productShipeable = productShipeable;
+	}
+
+	public String getImgUrlPath() {
+		return imgUrlPath;
+	}
+
+	public void setImgUrlPath(String imgUrlPath) {
+		this.imgUrlPath = imgUrlPath;
 	}
 
 

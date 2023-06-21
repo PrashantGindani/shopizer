@@ -56,7 +56,8 @@ public class JWTCustomerAuthenticationManager extends CustomAuthenticationManage
 		
         
         logger.info("checking authentication for user " + username);
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        Authentication auth= SecurityContextHolder.getContext().getAuthentication();
+        if (username != null && (auth == null || !auth.getName().equalsIgnoreCase(username))) {
 
             // It is not compelling necessary to load the use details from the database. You could also store the information
             // in the token and read it from it. It's up to you ;)
@@ -67,11 +68,11 @@ public class JWTCustomerAuthenticationManager extends CustomAuthenticationManage
             if (userDetails != null && jwtTokenUtil.validateToken(authToken, userDetails)) {
                 authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 logger.info("authenticated user " + username + ", setting security context");
                 //SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
-		
 		return authentication;
 	}
 

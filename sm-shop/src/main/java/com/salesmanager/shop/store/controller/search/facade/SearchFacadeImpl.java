@@ -72,8 +72,16 @@ public class SearchFacadeImpl implements SearchFacade {
 	public void indexAllData(MerchantStore store) throws Exception {
 		List<Product> products = productService.listByStore(store);
 
+		String contextPath = imageUtils.getContextPath();
+
 		products.stream().forEach(p -> {
 			try {
+				
+				StringBuilder imgPath = new StringBuilder();
+				imgPath.append(contextPath).append(imageUtils.buildProductImageUtils(store, p.getSku(), p.getProductImage().getProductImage()));
+
+				p.setImgUrlPath(imgPath.toString());
+				
 				searchService.index(store, p);
 			} catch (ServiceException e) {
 				throw new RuntimeException("Exception while indexing products", e);

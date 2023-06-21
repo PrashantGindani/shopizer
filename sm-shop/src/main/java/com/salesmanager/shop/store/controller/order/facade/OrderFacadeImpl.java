@@ -1032,7 +1032,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			readableOrders.add(readableOrder);
 
 		}
-
+		returnList.setRecordsTotal(orderList.getTotalCount());
 		returnList.setOrders(readableOrders);
 		return returnList;
 

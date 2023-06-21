@@ -17,4 +17,9 @@ public class ResourceNotFoundException extends ServiceRuntimeException {
     public ResourceNotFoundException(String message) {
         super(ERROR_CODE, message);
     }
+
+	@Override
+	public String toString() {
+		return "ResourceNotFoundException : "+getErrorMessage();
+	}
 }

@@ -1,6 +1,7 @@
 package com.salesmanager.core.business.services.search;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.salesmanager.core.business.configuration.ApplicationSearchConfiguration;
 import com.salesmanager.core.business.constants.Constants;
@@ -186,9 +188,10 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 			List<Map<String, String>> variants) throws ServiceException {
 
 		try {
-			ProductImage image = null;
+			String image = null;
 			if (!CollectionUtils.isEmpty(product.getImages())) {
-				image = product.getImages().stream().filter(i -> i.isDefaultImage()).findFirst().get();
+//				image = product.getImages().stream().filter(i -> i.isDefaultImage()).findFirst().get();
+				image = product.getImgUrlPath();
 			}
 			
 			/**
@@ -232,7 +235,7 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 			}
 
 			if (image != null) {
-				item.setImage(image.getProductImage());
+				item.setImage(image);
 			}
 
 			if (product.getProductReviewAvg() != null) {
@@ -510,10 +513,9 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 	
 	public String loadClassPathResource(String file) throws Exception {
 		Resource res = new ClassPathResource(file);
-		File f = res.getFile();
-		
-		return new String(
-			      Files.readAllBytes(f.toPath()));
+		byte[] binaryData = FileCopyUtils.copyToByteArray(res.getInputStream());
+        
+        return new String(binaryData, StandardCharsets.UTF_8);
 	}
 
 }

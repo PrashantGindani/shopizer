@@ -170,7 +170,7 @@ public class AuthenticateCustomerApi {
      * @throws AuthenticationException
      */
     @RequestMapping(value = "/customer/login", method = RequestMethod.POST, produces ={ "application/json" })
-    @ApiOperation(httpMethod = "POST", value = "Authenticates a customer to the application", notes = "Customer can authenticate after registration, request is {\"username\":\"admin\",\"password\":\"password\"}",response = ResponseEntity.class)
+    @ApiOperation(httpMethod = "POST", value = "Authenticates a customer to the application", notes = "Customer can authenticate after registration, request is {\"username\":\"admin\",\"password\":\"password\"}",response = AuthenticationResponse.class)
     @ResponseBody
     public ResponseEntity<?> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws AuthenticationException {
 

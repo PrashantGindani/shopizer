@@ -1,5 +1,7 @@
 package com.salesmanager.shop.store.api.v1.product;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,8 +53,11 @@ import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
 import com.salesmanager.shop.store.api.exception.UnauthorizedException;
 import com.salesmanager.shop.store.controller.product.facade.ProductCommonFacade;
 import com.salesmanager.shop.store.controller.product.facade.ProductFacade;
+import com.salesmanager.shop.store.security.JWTTokenUtil;
+import com.salesmanager.shop.store.security.common.CustomAuthenticationException;
 import com.salesmanager.shop.utils.ImageFilePath;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -75,6 +81,9 @@ import springfox.documentation.annotations.ApiIgnore;
 		@Tag(name = "Product definition  resource, add product to category", description = "View product, Add product, edit product and delete product") })
 public class ProductApi {
 
+    @Value("${authToken.header}")
+    private String tokenHeader;
+    
 	@Inject
 	private CategoryService categoryService;
 
@@ -90,8 +99,12 @@ public class ProductApi {
 	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
+	
+	@Inject
+	private JWTTokenUtil jwtTokenUtil;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductApi.class);
+	private static final String BEARER = "Bearer";
 
 	/**
 	 * Create product
@@ -214,6 +227,22 @@ public class ProductApi {
 
 		Principal principal = request.getUserPrincipal();
 		String userName = principal!=null? principal.getName():"";
+		String requestHeader = request.getHeader(tokenHeader);// token
+		
+		if(principal==null && requestHeader!=null && !requestHeader.isEmpty()) {
+		    String authToken;
+
+		    authToken = ofNullable(requestHeader).map(value -> removeStart(value, BEARER)).map(String::trim)
+		        .orElseThrow(() -> new CustomAuthenticationException("Missing Authentication Token"));
+
+		    try {
+		    	userName = jwtTokenUtil.getUsernameFromToken(authToken);
+		    } catch (IllegalArgumentException e) {
+		      LOGGER.error("an error occured during getting username from token", e);
+		    } catch (ExpiredJwtException e) {
+		      LOGGER.warn("the token is expired and not valid anymore", e);
+		    }
+		}
 		
 		ProductCriteria criteria = new ProductCriteria();
 
